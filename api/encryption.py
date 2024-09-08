@@ -14,6 +14,6 @@ def encrypt(text):
 
 def decrypt(encrypted_text):
     encrypted_data = base64.b64decode(encrypted_text.encode('utf-8'))
-    iv = encrypted_text[:16]  # Extract the IV
+    iv = encrypted_data[:16]  # Extract the IV
     cipher = AES.new(key, AES.MODE_CFB, iv=iv)
     return cipher.decrypt(encrypted_data[16:]).decode('utf-8')
