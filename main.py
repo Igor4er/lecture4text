@@ -24,7 +24,7 @@ def register_handlers(dp: Dispatcher):
     for name in handlers_list:
         handler = match("handlers", name, "router", dp.include_router)
         if not handler:
-            raise ModuleNotFoundError(f"router missing in handlers/{name}.py")
+            raise ModuleNotFoundError(f"router missing in handlers/{name}")
 
 def register_middlewares(dp: Dispatcher):
     def regboth(mw):

@@ -30,3 +30,8 @@ async def start_audio_prompt(message: Message, state: FSMContext, user: User):
         return [text[i:i + max_length] for i in range(0, len(text), max_length)]
     for t in split_long_string(text):
         await message.answer(t)
+
+@router.message(F.text.startswith("https://"))
+@need_permissions([Permissions.create_audio_prompt])
+async def url_audio_prompt(message: Message, state: FSMContext, user: User):
+    await message.answer("🚧 В РОЗРОБЦІ 🚧")

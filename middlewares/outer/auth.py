@@ -2,6 +2,8 @@ from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
 import jwt
+from api.auth import authenticate_user, logout_user
+from api.auth import get_user
 from config import CONFIG
 from dto.user import User
 
@@ -12,9 +14,6 @@ class CounterMiddleware(BaseMiddleware):
     E_MSG = "🤡"
     K_MSG = "❇️ lecture4text made by @ig4er"
 
-    def __init__(self) -> None:
-        self.AUTHENTICATED_USERS: dict[int, User] = {}
-
     async def __call__(
         self,
         handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
@@ -23,11 +22,13 @@ class CounterMiddleware(BaseMiddleware):
     ) -> Any:
         uid = event.from_user.id
         message = event
+        if isinstance(event, CallbackQuery):
+            message = event.message
         message_text = message.text
-        user = self.AUTHENTICATED_USERS.get(uid, None)
+        user = await get_user(uid)
         if isinstance(user, User):
             if message_text in ("/quit", "/stop"):
-                del self.AUTHENTICATED_USERS[uid]
+                await logout_user(uid)
                 return await message.answer(self.Q_MSG)
             data.update({"user": user})
             return await handler(event, data)
@@ -51,10 +52,11 @@ class CounterMiddleware(BaseMiddleware):
             try:
                 u = User.model_validate(user)
             except Exception as E:
+                print(E)
                 return await message.answer(self.E_MSG)
 
             await message.answer(self.K_MSG)
-            return self.AUTHENTICATED_USERS.update({uid: u})
+            return await authenticate_user(u, uid)
         await message.answer(self.A_MSG)
         
         
