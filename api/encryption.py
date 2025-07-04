@@ -2,9 +2,11 @@ from Crypto.Cipher import AES
 from config import CONFIG
 from Crypto.Random import get_random_bytes
 import base64
+from sys import exit
 
 
 key = CONFIG.AES_KEY.get_secret_value().encode('utf-8')
+print(len(key))
 
 def encrypt(text):
     iv = get_random_bytes(16)

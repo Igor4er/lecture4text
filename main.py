@@ -1,11 +1,12 @@
 import asyncio
 import logging
-import os
 import sys
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 import importlib
+
+from deepgram.clients.listen.v1.websocket.async_client import Callable
 from handlers import handlers_list
 from middlewares.outer import outer_middlewares
 from dotenv import load_dotenv
@@ -16,7 +17,7 @@ load_dotenv()
 dp = Dispatcher()
 
 
-def match(module: str, name: str, obj: str, fn: callable):
+def match(module: str, name: str, obj: str, fn: Callable):
     mod = importlib.import_module(f"{module}.{name}")
     return hasattr(mod, obj) and fn(getattr(mod, obj))
 

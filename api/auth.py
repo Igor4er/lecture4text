@@ -1,8 +1,6 @@
 from api.mongo import db_session
 from dto.user import User
 
-
-from motor.motor_asyncio import AsyncIOMotorDatabase
 AUTHENTICATED_USERS_COLLECTION_NAME = "authenticated_users"
 
 
