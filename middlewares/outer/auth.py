@@ -6,7 +6,10 @@ from api.auth import authenticate_user, logout_user
 from api.auth import get_user
 from config import CONFIG
 from dto.user import User
+from util.auth import get_promos
 
+PROMOS = get_promos()
+SET_DG_KEY_KEY = "set_dg_key"
 
 class CounterMiddleware(BaseMiddleware):
     A_MSG = "🔓 Authenticate using /start command\nUsage: <code>/start ACCESS_KEY</code>"
@@ -39,12 +42,24 @@ class CounterMiddleware(BaseMiddleware):
             if len(mts) != 2:
                 return await message.answer(self.A_MSG)
             token = mts[1]
-            if len(token) < 100:
+            if len(token) < 30:
                 return await message.answer(self.E_MSG)
-            try:
-                user = jwt.decode(token, CONFIG.JWT_SECRET.get_secret_value(), algorithms=["HS256"])
-            except Exception as E:
-                print(E)
+
+            print(token)
+            if token.startswith("l4t__"):
+                promo_code = token.removeprefix("l4t__")
+                if promo_code in PROMOS:
+                    promo = PROMOS[promo_code]
+                    await message.answer(promo["msg"])
+                    user = promo["user"]
+                    user.update(for_ids=[uid])
+            else:
+                try:
+                    user = jwt.decode(token, CONFIG.JWT_SECRET.get_secret_value(), algorithms=["HS256"])
+                except Exception as E:
+                    print(E)
+                    return await message.answer(self.E_MSG)
+            if not isinstance(user, dict):
                 return await message.answer(self.E_MSG)
 
             for_ids = user.get("for_ids", None)
@@ -53,7 +68,10 @@ class CounterMiddleware(BaseMiddleware):
                     return await message.answer(self.E_MSG)
 
             try:
-                u = User.model_validate(user)
+                u = User.model_validate({**user, "uid": uid})
+                if SET_DG_KEY_KEY in user:
+                    s = await u.get_settings()
+                    await s.update_deepgram_key(user[SET_DG_KEY_KEY])
             except Exception as E:
                 print(E)
                 return await message.answer(self.E_MSG)

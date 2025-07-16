@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, SecretStr
+from pydantic import BaseModel, field_validator, SecretStr, ConfigDict
 from typing import List
 from enum import Enum
 from api.deepgram import Deepgram
@@ -53,9 +53,11 @@ class Permissions(str, Enum):
 
 class User(BaseModel):
     uid: int | None = None
-    exp: int
     for_ids: List[int]
     permissions: List[Permissions]
+
+    model_config = ConfigDict(extra="ignore")
+
 
     @field_validator('permissions', mode="before")
     def _handle_all_permissions(cls, value):

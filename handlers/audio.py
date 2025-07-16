@@ -25,13 +25,10 @@ async def start_audio_prompt(message: Message, state: FSMContext, user: User):
     dg = await user.deepgram()
     resp = await dg.get_words_from_file_bytes(voice)
     text = resp["results"]["channels"][0]["alternatives"][0]['transcript']
-    def split_long_string(text, max_length=4000):
-        # Split the text into chunks of 'max_length' characters or less
-        return [text[i:i + max_length] for i in range(0, len(text), max_length)]
-    gist = await user.gist()
-    await gist.create_gist_from_text(text)
-    for t in split_long_string(text):
-        await message.answer(t)
+    # gist = await user.gist()
+    # await gist.create_gist_from_text(text)
+    t = text[:3950] + "..." if len(text) > 3950 else ""
+    await message.answer(t)
 
 @router.message(F.text.startswith("https://"))
 @need_permissions([Permissions.create_audio_prompt])

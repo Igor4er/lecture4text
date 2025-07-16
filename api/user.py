@@ -1,7 +1,6 @@
 from api.mongo import db_session
 
 
-from motor.motor_asyncio import AsyncIOMotorDatabase
 USERS_SETTINGS_COLLECTION_NAME = "users_settings"
 
 
@@ -27,4 +26,3 @@ async def update_user_settings(settings: dict):
         print(E)
         return False
     return True
-
